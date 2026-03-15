@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZaxodTG</title>
+
+<style>
+:root{
+--accent:#800080;
+--accentGlow:#ff00ff;
+--bg1:#140014;
+--bg2:#060006;
+--glass:rgba(120,0,120,0.15);
+--text:#ffffff;
+}
+
+*{
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
+-webkit-tap-highlight-color:transparent;
+}
+
+body{
+margin:0;
+background:linear-gradient(180deg,var(--bg1),var(--bg2));
+color:var(--text);
+overflow:hidden;
+}
+
+/* SPLASH */
+#splash{
+position:fixed;
+inset:0;
+background:#090009;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+font-weight:800;
+z-index:1000;
+animation:fadeOut 1s 2s forwards;
+}
+@keyframes fadeOut{to{opacity:0;visibility:hidden}}
+
+/* FACE ID */
+#face{
+position:fixed;
+inset:0;
+background:#000;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+z-index:999;
+animation:fadeOut 1s 3.2s forwards;
+}
+.scan{
+width:110px;height:110px;
+border:3px solid var(--accent);
+border-radius:22px;
+position:relative;
+overflow:hidden;
+}
+.scan:after{
+content:"";
+position:absolute;
+left:0;right:0;
+height:4px;
+background:var(--accentGlow);
+animation:scan 1.3s infinite;
+}
+@keyframes scan{
+0%{top:0}
+100%{top:100%}
+}
+
+/* APP */
+.app{
+max-width:480px;
+margin:auto;
+padding:16px 16px 110px;
+opacity:0;
+animation:fadeIn 1s 3.5s forwards;
+}
+@keyframes fadeIn{to{opacity:1}}
+
+/* SCREENS */
+.screen{
+display:none;
+animation:slide .35s ease;
+}
+.screen.active{
+display:block;
+}
+@keyframes slide{
+from{opacity:0;transform:translateX(25px)}
+to{opacity:1;transform:none}
+}
+
+/* HEADER */
+.top{
+display:flex;
+justify-content:space-between;
+font-weight:700;
+margin-bottom:12px;
+}
+
+/* GLOBE BUTTON */
+.globe-wrap{
+display:flex;
+justify-content:center;
+align-items:center;
+height:230px;
+}
+.globe{
+width:200px;height:200px;
+border-radius:50%;
+background:radial-gradient(circle,#200020,#060006);
+display:flex;
+align-items:center;
+justify-content:center;
+position:relative;
+cursor:pointer;
+transition:.3s;
+box-shadow:0 0 35px var(--accent);
+}
+.globe.active{
+animation:pulse 1.6s infinite;
+}
+@keyframes pulse{
+0%{box-shadow:0 0 20px var(--accent)}
+50%{box-shadow:0 0 70px var(--accentGlow)}
+100%{box-shadow:0 0 20px var(--accent)}
+}
+
+.globe-text{
+font-weight:800;
+text-align:center;
+}
+
+.status{
+text-align:center;
+margin-top:12px;
+font-weight:600;
+}
+
+/* CARDS */
+.card{
+background:var(--glass);
+backdrop-filter:blur(30px);
+border-radius:22px;
+padding:14px;
+margin-bottom:14px;
+}
+
+/* NAVIGATION */
+.nav{
+position:fixed;
+bottom:18px;
+left:50%;
+transform:translateX(-50%);
+width:94%;
+max-width:480px;
+background:rgba(80,0,80,.45);
+backdrop-filter:blur(30px);
+border-radius:30px;
+padding:10px 4px;
+display:flex;
+justify-content:space-around;
+box-shadow:0 10px 30px rgba(0,0,0,.5);
+}
+
+.nav-item{
+display:flex;
+flex-direction:column;
+align-items:center;
+font-size:11px;
+opacity:.6;
+cursor:pointer;
+transition:.2s;
+}
+
+.nav-item.active{
+opacity:1;
+}
+
+.icon{
+width:22px;height:22px;
+margin-bottom:4px;
+}
+
+.indicator{
+width:6px;height:6px;
+border-radius:50%;
+background:#00ff88;
+margin-top:2px;
+display:none;
+}
+.indicator.on{
+display:block;
+}
+
+/* AUTH */
+.auth{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+input{
+padding:12px;
+border-radius:12px;
+border:none;
+background:#1e001e;
+color:white;
+}
+
+button{
+padding:12px;
+border:none;
+border-radius:14px;
+background:var(--accent);
+color:white;
+font-weight:600;
+cursor:pointer;
+}
+
+</style>
+</head>
+<body>
+
+<div id="splash">ZaxodTG</div>
+
+<div id="face">
+<div class="scan"></div>
+<div style="margin-top:15px">Face ID</div>
+</div>
+
+<div class="app">
+
+<!-- AUTH SCREEN -->
+<div class="screen active" id="auth">
+<div class="top">Вход / Регистрация</div>
+<div class="card auth">
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Пароль">
+<button onclick="register()">Регистрация</button>
+<button onclick="login()">Войти</button>
+</div>
+</div>
+
+<!-- HOME -->
+<div class="screen" id="home">
+<div class="top">
+<div>ZaxodTG</div>
+<div id="userLabel"></div>
+</div>
+
+<div class="globe-wrap">
+<div class="globe" id="globe" onclick="connect()">
+<div class="globe-text" id="globeText">ПОДКЛЮЧИТЬ</div>
+</div>
+</div>
+
+<div class="status" id="status">Готово к подключению</div>
+
+<div class="card">
+IP: <span id="ip">—</span><br>
+Пинг: <span id="ping">0</span> ms<br>
+⏱ <span id="time">00:00</span>
+</div>
+</div>
+
+<!-- STATS -->
+<div class="screen" id="stats">
+<div class="card">Trial аналитика активна</div>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="settings">
+<div class="card">
+<button onclick="logout()">Выйти</button>
+</div>
+</div>
+
+</div>
+
+<!-- NAV -->
+<div class="nav">
+<div class="nav-item active" onclick="switchScreen('home',this)">
+<svg class="icon" viewBox="0 0 24 24" fill="white"><path d="M12 3L3 10h3v9h5v-6h2v6h5v-9h3z"/></svg>
+Главная
+<div class="indicator" id="navIndicator"></div>
+</div>
+
+<div class="nav-item" onclick="switchScreen('stats',this)">
+<svg class="icon" viewBox="0 0 24 24" fill="white"><path d="M3 3h2v18H3zm4 8h2v10H7zm4-5h2v15h-2zm4 3h2v12h-2zm4-6h2v18h-2z"/></svg>
+Статистика
+</div>
+
+<div class="nav-item" onclick="switchScreen('settings',this)">
+<svg class="icon" viewBox="0 0 24 24" fill="white"><path d="M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+Настройки
+</div>
+</div>
+
+<script>
+let connected=false;
+let timer=0;
+let users=JSON.parse(localStorage.getItem("users")||"[]");
+
+function vibrate(){
+navigator.vibrate?.(30);
+}
+
+function register(){
+vibrate();
+let emailVal=email.value;
+let passVal=password.value;
+if(!emailVal||!passVal)return;
+users.push({email:emailVal,password:passVal});
+localStorage.setItem("users",JSON.stringify(users));
+alert("Аккаунт создан");
+}
+
+function login(){
+vibrate();
+let emailVal=email.value;
+let passVal=password.value;
+let user=users.find(u=>u.email===emailVal&&u.password===passVal);
+if(user){
+localStorage.setItem("currentUser",emailVal);
+startApp();
+}else{
+alert("Неверные данные");
+}
+}
+
+function startApp(){
+auth.classList.remove("active");
+home.classList.add("active");
+userLabel.innerText=localStorage.getItem("currentUser");
+}
+
+function logout(){
+localStorage.removeItem("currentUser");
+location.reload();
+}
+
+function switchScreen(id,el){
+vibrate();
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
+el.classList.add("active");
+}
+
+function connect(){
+vibrate();
+if(!connected){
+globe.classList.add("active");
+globeText.innerText="ПОДКЛЮЧЕНИЕ...";
+setTimeout(()=>{
+window.location.href="tg://proxy?server=5.255.117.127&port=1080&protocol=socks5";
+globeText.innerText="ПОДКЛЮЧЕНО";
+status.innerText="Соединение защищено";
+navIndicator.classList.add("on");
+connected=true;
+startTimer();
+},1500);
+}else{
+globe.classList.remove("active");
+globeText.innerText="ПОДКЛЮЧИТЬ";
+status.innerText="Отключено";
+navIndicator.classList.remove("on");
+connected=false;
+}
+}
+
+function startTimer(){
+setInterval(()=>{
+timer++;
+let m=Math.floor(timer/60).toString().padStart(2,'0');
+let s=(timer%60).toString().padStart(2,'0');
+time.innerText=m+":"+s;
+ping.innerText=Math.floor(Math.random()*40+10);
+},1000);
+}
+
+/* SWIPE */
+let startX=0;
+document.addEventListener("touchstart",e=>startX=e.touches[0].clientX);
+document.addEventListener("touchend",e=>{
+let diff=e.changedTouches[0].clientX-startX;
+if(diff>80)switchScreen("home",document.querySelectorAll(".nav-item")[0]);
+if(diff<-80)switchScreen("stats",document.querySelectorAll(".nav-item")[1]);
+});
+
+if(localStorage.getItem("currentUser"))startApp();
+</script>
+
+</body>
+</html>
